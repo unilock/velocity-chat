@@ -111,33 +111,49 @@ public class GlobalChat {
 
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
-        if (!config.LEAVE_ENABLE)
+        if (!(config.DISCONNECT_ENABLE || config.LEAVE_ENABLE))
             return;
 
+        DisconnectEvent.LoginStatus loginStatus = event.getLoginStatus();
         String player = event.getPlayer().getUsername();
         Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
-        if (currentServer.isEmpty() && config.DISCONNECT_ENABLE) {
-            Component msg = parseMessage(config.DISCONNECT_FORMAT, List.of(
-                    new ChatTemplate("player", player, false)
+        if (loginStatus == null || !loginStatus.equals(DisconnectEvent.LoginStatus.SUCCESSFUL_LOGIN)) {
+            if (!config.DISCONNECT_ENABLE)
+                return;
+
+            if (currentServer.isPresent()) {
+                String server = currentServer.get().getServerInfo().getName();
+
+                Component msg = parseMessage(config.DISCONNECT_FORMAT_SERVER, List.of(
+                        new ChatTemplate("player", player, false),
+                        new ChatTemplate("server", server, false)
+                ));
+
+                sendMessage(msg);
+            } else {
+                Component msg = parseMessage(config.DISCONNECT_FORMAT, List.of(
+                        new ChatTemplate("player", player, false)
+                ));
+
+                sendMessage(msg);
+            }
+        } else {
+            if (!config.LEAVE_ENABLE)
+                return;
+
+            String server = currentServer.get().getServerInfo().getName();
+
+            Component msg = parseMessage(config.LEAVE_FORMAT, List.of(
+                    new ChatTemplate("player", player, false),
+                    new ChatTemplate("server", server, false)
             ));
 
-            sendMessage(msg);
-
-            return;
+            if (!config.LEAVE_PASSTHROUGH)
+                sendMessage(msg, currentServer.get().getServer());
+            else
+                sendMessage(msg);
         }
-
-        String server = currentServer.get().getServerInfo().getName();
-
-        Component msg = parseMessage(config.LEAVE_FORMAT, List.of(
-                new ChatTemplate("player", player, false),
-                new ChatTemplate("server", server, false)
-        ));
-
-        if (!config.LEAVE_PASSTHROUGH)
-            sendMessage(msg, currentServer.get().getServer());
-        else
-            sendMessage(msg);
     }
 
     private Component parseMessage(String input, List<ChatTemplate> templates) {

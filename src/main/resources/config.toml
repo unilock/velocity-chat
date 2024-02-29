@@ -57,3 +57,4 @@ format = "<yellow><player> switched from <previous_server> to <server></yellow>"
 # (e.g. due to timing out, having an incompatible client, or some other error)
 enable = true
 format = "<yellow><player> was disconnected</yellow>"
+format_server = "<yellow><player> was disconnected from <server></yellow>"

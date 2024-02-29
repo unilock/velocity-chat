@@ -45,6 +45,7 @@ public class Config {
 
     public boolean DISCONNECT_ENABLE;
     public String DISCONNECT_FORMAT;
+    public String DISCONNECT_FORMAT_SERVER;
 
     @Inject
     public Config(@DataDirectory Path dataDir) {
@@ -108,5 +109,6 @@ public class Config {
 
         this.DISCONNECT_ENABLE = this.toml.getBoolean("disconnect.enable", true);
         this.DISCONNECT_FORMAT = this.toml.getString("disconnect.format", "<yellow><player> was disconnected</yellow>");
+        this.DISCONNECT_FORMAT_SERVER = this.toml.getString("disconnect.format_server", "<yellow><player> was disconnected from <server></yellow>");
     }
 }
